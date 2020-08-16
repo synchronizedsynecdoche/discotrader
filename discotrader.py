@@ -46,7 +46,7 @@ class DiscoTrader(commands.Cog):
 
 
     @commands.command(name='init')
-    async def init(ctx):
+    async def init(self, ctx):
         if ctx.message.author.id != ADMIN:
             await ctx.send(AUTH_ERR)
         else:

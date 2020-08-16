@@ -4,19 +4,12 @@ from utils import *
 from user import User
 import pickle
 from datetime import datetime
-import configparser
 NewType("User", User)
 NewType("TraderResponse", TraderResponse)
+from utils import api
 
 DEBUG = True 
-
-config = configparser.ConfigParser()
-
-config.read('config.ini')
-ALP_ERR = "Alpaca encountered an error: "
-API_KEY_ID = config['ALPACA']['API_KEY_ID']
-API_SECRET_KEY = config['ALPACA']['API_SECRET_KEY']
-API_BASE_URL =  config['ALPACA']['API_BASE_URL'] if config['ALPACA']['API_BASE_URL'] else "https://paper-api.alpaca.markets" # be careful changing this!
+FORCE_EXECUTION = True
 
 def dprint(*args, **kwargs):
     if DEBUG:
@@ -24,9 +17,9 @@ def dprint(*args, **kwargs):
 
 class Trader(object):
 
-    api = ata.REST(key_id=API_KEY_ID, secret_key=API_SECRET_KEY, base_url=API_BASE_URL)
+
     user_db: List[User] = []
-    is_loaded = False
+    is_loaded: bool = False
 
     def persist(self) -> None:
 
@@ -42,7 +35,6 @@ class Trader(object):
     
     def load(self) -> TraderResponse:
 
-        
         self.is_loaded = True #even if we fail, we're considered loaded with a blank db
         try:
 
@@ -52,6 +44,7 @@ class Trader(object):
                 self.user_db = temp
                 return TraderResponse(True, "Loaded successfully!")
         
+
         except FileNotFoundError as e:
         
             dprint(e)
@@ -62,7 +55,7 @@ class Trader(object):
         if id not in [u.ident for u in self.user_db]:
             temp = User(id)
             self.user_db.append(temp)
-        #persist()
+            self.persist()
 
     def locate_user(self, id: int) -> User:
 
@@ -71,6 +64,7 @@ class Trader(object):
                 return u
         return None
 
+
     def get_user_value(self, id: int) -> TraderResponse:
 
         worth: float = 0
@@ -78,11 +72,8 @@ class Trader(object):
 
         if u is None:
             return TraderResponse(False, "User doesn't exist!")
-        for asset in u.portfolio:
         
-            worth += self.api.get_last_trade(asset).price * u.portfolio[asset]
-        worth += u.buying_power
-        return TraderResponse(True, str(worth))
+        return u.getPortfolioValue()
 
 
     def buy(self, id: int, ticker: str, quantity: float) -> TraderResponse:
@@ -99,7 +90,7 @@ class Trader(object):
             return TraderResponse(False, f"purchaser {id} doesn't exist!")
         #turn this into a switch statement for excepts...
         try:
-            price = self.api.get_last_trade(ticker).price
+            price = api.get_last_trade(ticker).price
         except Exception as e:
             dprint(e)
             return TraderResponse(False,ALP_ERR + str(e))
@@ -109,24 +100,20 @@ class Trader(object):
             dprint(f"Insufficient buying power! Have {purchaser.buying_power} but need {price * quantity}")
             return TraderResponse(False, f"Insufficient buying power! Have {purchaser.buying_power} but need {price * quantity}")
     
-        ctime = self.api.get_clock()
-        if not ctime.is_open:
+        ctime = api.get_clock()
+        if not ctime.is_open and not FORCE_EXECUTION:
             return TraderResponse(False, "Markets are closed!")
 
         try:
 
-            self.api.submit_order(ticker, quantity, Side.buy, Type.market, TiF.day)
+            api.submit_order(ticker, quantity, Side.buy, Type.market, TiF.day)
         except Exception as e:
             dprint(e)
             return TraderResponse(False, ALP_ERR + str(e))
-    
-        try:
-            purchaser.portfolio[ticker] += quantity
-        except KeyError:
-            #dprint("key error!")
-            purchaser.portfolio[ticker] = quantity
+
+        purchaser.updatePosition(ticker, quantity)
         purchaser.buying_power -= price * quantity
-        
+
         self.persist()
         return TraderResponse(True, "Success!")
 
@@ -145,7 +132,7 @@ class Trader(object):
             
         #turn this into a switch statement for excepts...
         try:
-            price = self.api.get_last_trade(ticker).price
+            price = api.get_last_trade(ticker).price
         except Exception as e:
             dprint(e)
             return TraderResponse(False, ALP_ERR + str(e))
@@ -159,12 +146,12 @@ class Trader(object):
             dprint(e)
             return TraderResponse(False, str(e) + f" are you sure you're holding {ticker}?")
 
-        ctime = self.api.get_clock()
-        if not ctime.is_open:
+        ctime = api.get_clock()
+        if not ctime.is_open and not FORCE_EXECUTION:
             return TraderResponse(False, "Markets are closed!")
 
         try:
-            self.api.submit_order(ticker, quantity, Side.sell, Type.market, TiF.day)
+            api.submit_order(ticker, quantity, Side.sell, Type.market, TiF.day)
         except Exception as e:
             dprint(e)
             return TraderResponse(False, ALP_ERR + str(e))
