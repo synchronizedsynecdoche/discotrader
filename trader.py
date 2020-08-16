@@ -73,7 +73,7 @@ class Trader(object):
         if u is None:
             return TraderResponse(False, "User doesn't exist!")
         
-        return u.getPortfolioValue()
+        return TraderResponse(True, str(u.getPortfolioValue()+ u.buying_power))
 
 
     def buy(self, id: int, ticker: str, quantity: float) -> TraderResponse:
@@ -111,8 +111,8 @@ class Trader(object):
             dprint(e)
             return TraderResponse(False, ALP_ERR + str(e))
 
-        purchaser.updatePosition(ticker, quantity)
-        purchaser.buying_power -= price * quantity
+        print(type(purchaser.portfolio))
+        purchaser.updatePosition(ticker, quantity, price)
 
         self.persist()
         return TraderResponse(True, "Success!")
@@ -138,10 +138,10 @@ class Trader(object):
             return TraderResponse(False, ALP_ERR + str(e))
     
         try:
-            if quantity > seller.portfolio[ticker]:
+            if quantity > seller.findPosition(ticker).quantity:
         
-                dprint(f"Insufficient holdings! Have {seller.portfolio[ticker]} but need {quantity}")
-                return TraderResponse(False, f"Insufficient holdings! Have {seller.portfolio[ticker]} but need {quantity}")
+                dprint(f"Insufficient holdings! Have {seller.findPosition(ticker).quantity} but need {quantity}")
+                return TraderResponse(False, f"Insufficient holdings! Have {seller.findPosition(ticker).quantity} but need {quantity}")
         except KeyError as e:
             dprint(e)
             return TraderResponse(False, str(e) + f" are you sure you're holding {ticker}?")
@@ -155,8 +155,8 @@ class Trader(object):
         except Exception as e:
             dprint(e)
             return TraderResponse(False, ALP_ERR + str(e))
-    
-        seller.portfolio[ticker] -= quantity
-        seller.buying_power += price * quantity
+
+
+        seller.updatePosition(ticker, -quantity, price)
         self.persist()
         return TraderResponse(True, "Success!")

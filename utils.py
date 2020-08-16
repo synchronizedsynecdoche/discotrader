@@ -51,14 +51,14 @@ class Position(object):
     def __init__(self, ticker, init_quantity, init_cost, owner):
 
         self.ticker = ticker
-        self.quantity = quantity
+        self.quantity = init_quantity
         #self.a = init_cost
         self.owner = owner
 
 
     def getValue(self) -> float:
 
-        return self.quantity * api.api.get_last_trade(self.ticker).price
+        return self.quantity * api.get_last_trade(self.ticker).price
 
     def update(self, delta, price_per_share) -> None:
 

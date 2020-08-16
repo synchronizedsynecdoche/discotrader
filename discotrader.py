@@ -137,10 +137,8 @@ class DiscoTrader(commands.Cog):
 
         for u in self.trader.user_db:
             if u.ident == ctx.message.author.id:
-                for key in u.portfolio:
-                    if u.portfolio[key] > 0 :
-                        await ctx.send(f"{key} : {u.portfolio[key]}")
+                for p in u.portfolio:
+                    await ctx.send(f"{p.ticker} : {p.getValue()}")
                     
-
         
 dt = DiscoTrader(commands.Bot(command_prefix='?'))
