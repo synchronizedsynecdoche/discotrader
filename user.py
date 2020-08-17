@@ -36,10 +36,11 @@ class User(object):
         self.portfolio.append(Position(ticker, delta, price, self.ident))
         self.buying_power -= price * delta
     
-    def findPosition(self, ticker):
+    def findPosition(self, ticker) -> Position:
 
         # TODO: make this error resistant
         for p in self.portfolio:
             if p.ticker == ticker:
 
                 return p
+        return None

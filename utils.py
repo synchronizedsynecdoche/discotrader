@@ -45,14 +45,14 @@ class Position(object):
 
     ticker: str
     quantity: float = 0
-    #avg_cost = 0
+    sigma_cost: float = 0
     owner: int = 0
 
-    def __init__(self, ticker, init_quantity, init_cost, owner):
+    def __init__(self, ticker, init_quantity, init_price_per_share, owner):
 
         self.ticker = ticker
         self.quantity = init_quantity
-        #self.a = init_cost
+        self.sigma_cost = init_quantity * init_price_per_share
         self.owner = owner
 
 
@@ -63,12 +63,27 @@ class Position(object):
     def update(self, delta, price_per_share) -> None:
 
         self.quantity += delta
+        self.sigma_cost += delta * price_per_share # if this goes negative, it signifies a gain
     
     def getQuantity(self) -> float:
         
         return self.quantity
 
-    
+    def getAverageCost(self) -> float:
+
+        if self.quantity == 0:
+            return 0
+        
+        return self.sigma_cost / self.quantity
+
+    def getTotalPriceChange(self) -> float:
+
+        return self.getValue() - self.sigma_cost 
 
 
+    def getPercentChange(self) -> float:
 
+        if self.getValue() == 0: # rip
+            return 0
+        
+        return 100 * (self.getValue() - self.sigma_cost) / self.getValue() 

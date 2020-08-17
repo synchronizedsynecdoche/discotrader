@@ -72,7 +72,7 @@ class DiscoTrader(commands.Cog):
             resp = self.ensureTraderExists()
             await ctx.send(resp.message)
 
-        self.trader.add_user(ctx.message.author.id)
+        self.trader.addUser(ctx.message.author.id)
         await ctx.send(f"Saw BUY from {ctx.message.author.id} for {quantity} shares of {ticker.upper()}")
     
         resp = self.trader.buy(ctx.message.author.id,ticker.upper(),quantity)
@@ -90,15 +90,15 @@ class DiscoTrader(commands.Cog):
         resp = self.trader.sell(ctx.message.author.id,ticker.upper(),quantity)
         await ctx.send(resp.message)
 
-    @commands.command(name='val')
-    async def val(self, ctx):
+    @commands.command(name='bp')
+    async def buyingPower(self, ctx):
     
         if self.trader is None or not self.trader.is_loaded:
             resp = self.ensureTraderExists()
             await ctx.send(resp.message)
 
 
-        resp = self.trader.get_user_value(ctx.message.author.id)
+        resp = self.trader.getBuyingPower(ctx.message.author.id)
         await ctx.send(resp.message)
 
     @commands.command(name='backup')
@@ -136,11 +136,9 @@ class DiscoTrader(commands.Cog):
             resp = self.ensureTraderExists()
             await ctx.send(resp.message)
 
-        for u in self.trader.user_db:
-            if u.ident == ctx.message.author.id:
-                for p in u.portfolio:
-                    await ctx.send(f"{p.ticker} : {p.getValue()}")
+        resp = self.trader.getPortfolio(ctx.message.author.id)
 
+        await ctx.send(resp.message)
     @commands.command(name='stock')
     async def stock(self, ctx, ticker):
 
@@ -164,9 +162,11 @@ class DiscoTrader(commands.Cog):
     User Commands:
         ?buy TICKER X: purchase X shares of TICKER
         ?sell TICKER X: sell X shares of TICKER
-        ?val: get your current net worth
+        ?bp: get your buying power
         ?pf: get your full portfolio
         ?stock TICKER: get information about a stock
-        ??: Display this message""")         
-        
+        ??: Display this message
+        ?help: alias for ??""")         
+    
+
 dt = DiscoTrader(commands.Bot(command_prefix='?'))

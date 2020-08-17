@@ -66,7 +66,7 @@ class Trader(object):
         return None
 
 
-    def getUserValue(self, id: int) -> TraderResponse:
+    def getBuyingPower(self, id: int) -> TraderResponse:
 
         worth: float = 0
         u: User = self.locateUser(id)
@@ -74,7 +74,7 @@ class Trader(object):
         if u is None:
             return TraderResponse(False, "User doesn't exist!")
         
-        return TraderResponse(True, str(u.getPortfolioValue()+ u.buying_power))
+        return TraderResponse(True, f"${u.buying_power}")
 
 
     def buy(self, id: int, ticker: str, quantity: float) -> TraderResponse:
@@ -187,3 +187,19 @@ class Trader(object):
     def getStockInfo(self, ticker: str)-> TraderResponse:
 
         return TraderResponse(True, f"https://stockcharts.com/c-sc/sc?s={ticker.upper()}&p=D&b=5&g=0&i=0&r=1597681545347")
+
+    def getPortfolio(self, id: int) -> TraderResponse:
+
+        answer: str = ""
+
+        for u in self.user_db:
+
+            if u.ident == id:
+                
+                for p in u.portfolio:
+
+                    answer += f"\n{p.ticker}:\n\t Shares: {p.getQuantity()}\n\t Average Cost: ${p.getAverageCost()}\n\t Change: {p.getTotalPriceChange()}\n\tPercent Change: {p.getPercentChange()}%"
+                return TraderResponse(True, answer)
+        
+        return TraderResponse(False, "No such user")
+                
