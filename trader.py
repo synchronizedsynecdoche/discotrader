@@ -146,15 +146,15 @@ class Trader(object):
         
                 dprint(f"Insufficient holdings! Have {seller.findPosition(ticker).quantity} but need {quantity}")
                 return TraderResponse(False, f"Insufficient holdings! Have {seller.findPosition(ticker).quantity} but need {quantity}")
-        except KeyError as e:
+        except NoneType as e:
             dprint(e)
             return TraderResponse(False, str(e) + f" are you sure you're holding {ticker}?")
 
         ctime = api.get_clock()
         if not ctime.is_open and not FORCE_EXECUTION:
 
-            buy_thread = threading.Thread(target=self.pendingSell, args=(id, ticker, quantity))
-            buy_thread.start()
+            sell_thread = threading.Thread(target=self.pendingSell, args=(id, ticker, quantity))
+            sell_thread.start()
             return TraderResponse(True, "Markets are closed, queueing order")
 
         try:
