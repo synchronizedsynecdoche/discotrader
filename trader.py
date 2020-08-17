@@ -51,14 +51,14 @@ class Trader(object):
             dprint(e)
             return TraderResponse(False, str(e) + " Starting a new DB")
     
-    def add_user(self, id: int) -> None:
+    def addUser(self, id: int) -> None:
 
         if id not in [u.ident for u in self.user_db]:
             temp = User(id)
             self.user_db.append(temp)
             self.persist()
 
-    def locate_user(self, id: int) -> User:
+    def locateUser(self, id: int) -> User:
 
         for u in self.user_db:
             if u.ident == id:
@@ -66,10 +66,10 @@ class Trader(object):
         return None
 
 
-    def get_user_value(self, id: int) -> TraderResponse:
+    def getUserValue(self, id: int) -> TraderResponse:
 
         worth: float = 0
-        u: User = self.locate_user(id)
+        u: User = self.locateUser(id)
 
         if u is None:
             return TraderResponse(False, "User doesn't exist!")
@@ -84,7 +84,7 @@ class Trader(object):
             dprint("Garbage in the args...")
             return TraderResponse(False, "Bad ticker or quantity!")
     
-        purchaser = self.locate_user(id)
+        purchaser = self.locateUser(id)
         if purchaser is None:
 
             dprint(f"purchaser {id} doesn't exist!")
@@ -128,7 +128,7 @@ class Trader(object):
             dprint("Garbage in the args...")
             return TraderResponse(False, "Bad ticker or quantity!")
     
-        seller = self.locate_user(id)
+        seller = self.locateUser(id)
         if seller is None:
 
             dprint(f"seller {id} doesn't exist!")
@@ -174,11 +174,16 @@ class Trader(object):
 
             time.sleep(600)
             dprint(f"{id} has a pending order to buy {quantity} shares of {ticker}")
-        self.buy(id, ticker, quantity)
+        
+        return self.buy(id, ticker, quantity)
 
-def pendingSell(self, id: int, ticker: str, quantity: float) -> TraderResponse:
+    def pendingSell(self, id: int, ticker: str, quantity: float) -> TraderResponse:
         while not api.get_clock().is_open:
 
             time.sleep(600)
             dprint(f"{id} has a pending order to sell {quantity} shares of {ticker}")
-        self.buy(id, ticker, quantity)
+        return self.buy(id, ticker, quantity)
+
+    def getStockInfo(self, ticker: str)-> TraderResponse:
+
+        return TraderResponse(True, f"https://stockcharts.com/c-sc/sc?s={ticker.upper()}&p=D&b=5&g=0&i=0&r=1597681545347")

@@ -141,6 +141,14 @@ class DiscoTrader(commands.Cog):
                 for p in u.portfolio:
                     await ctx.send(f"{p.ticker} : {p.getValue()}")
 
+    @commands.command(name='stock')
+    async def stock(self, ctx, ticker):
+
+        self.ensureTraderExists()
+        resp = self.trader.getStockInfo(ticker)
+
+        await ctx.send(resp.message)
+
     @commands.command(name='?')
     async def qmark(self, ctx):
 
@@ -158,6 +166,7 @@ class DiscoTrader(commands.Cog):
         ?sell TICKER X: sell X shares of TICKER
         ?val: get your current net worth
         ?pf: get your full portfolio
+        ?stock TICKER: get information about a stock
         ??: Display this message""")         
         
 dt = DiscoTrader(commands.Bot(command_prefix='?'))
