@@ -11,6 +11,7 @@ config.read('config.ini')
 TOKEN: str = config['DISCORD']['TOKEN']
 ADMIN: int = int(config['DISCORD']['ADMIN'])
 AUTH_ERR: str = "Unauthorized Action!"
+VERSION = 0
 
 class DiscoTrader(commands.Cog):
 
@@ -139,6 +140,24 @@ class DiscoTrader(commands.Cog):
             if u.ident == ctx.message.author.id:
                 for p in u.portfolio:
                     await ctx.send(f"{p.ticker} : {p.getValue()}")
-                    
+
+    @commands.command(name='?')
+    async def qmark(self, ctx):
+
+        await ctx.send(f"""DiscoTrader v{VERSION}
+    Testing Commands:
+        ?ping: pongs you
+        ?echo: echos you
+    Administrator Commands:
+        ?init: initialize the trader
+        ?load: initialize the trader and load the database
+        ?backup: make a copy of the database object
+        ?clear: clear the database
+    User Commands:
+        ?buy TICKER X: purchase X shares of TICKER
+        ?sell TICKER X: sell X shares of TICKER
+        ?val: get your current net worth
+        ?pf: get your full portfolio
+        ??: Display this message""")         
         
 dt = DiscoTrader(commands.Bot(command_prefix='?'))
