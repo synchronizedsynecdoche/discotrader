@@ -1,15 +1,16 @@
-import alpaca_trade_api as ata
 from typing import List, Dict, Any, NewType
 from utils import *
 from user import User
 import pickle
 from datetime import datetime
+import time
 NewType("User", User)
 NewType("TraderResponse", TraderResponse)
 from utils import api
+import threading
 
 DEBUG = True 
-FORCE_EXECUTION = True
+FORCE_EXECUTION = False
 
 def dprint(*args, **kwargs):
     if DEBUG:
@@ -102,7 +103,10 @@ class Trader(object):
     
         ctime = api.get_clock()
         if not ctime.is_open and not FORCE_EXECUTION:
-            return TraderResponse(False, "Markets are closed!")
+
+            buy_thread = threading.Thread(target=self.pendingBuy, args=(id, ticker, quantity))
+            buy_thread.start()
+            return TraderResponse(True, "Markets are closed, queueing order")
 
         try:
 
@@ -148,7 +152,10 @@ class Trader(object):
 
         ctime = api.get_clock()
         if not ctime.is_open and not FORCE_EXECUTION:
-            return TraderResponse(False, "Markets are closed!")
+
+            buy_thread = threading.Thread(target=self.pendingSell, args=(id, ticker, quantity))
+            buy_thread.start()
+            return TraderResponse(True, "Markets are closed, queueing order")
 
         try:
             api.submit_order(ticker, quantity, Side.sell, Type.market, TiF.day)
@@ -160,3 +167,18 @@ class Trader(object):
         seller.updatePosition(ticker, -quantity, price)
         self.persist()
         return TraderResponse(True, "Success!")
+
+
+    def pendingBuy(self, id: int, ticker: str, quantity: float) -> TraderResponse:
+        while not api.get_clock().is_open:
+
+            time.sleep(600)
+            dprint(f"{id} has a pending order to buy {quantity} shares of {ticker}")
+        self.buy(id, ticker, quantity)
+
+def pendingSell(self, id: int, ticker: str, quantity: float) -> TraderResponse:
+        while not api.get_clock().is_open:
+
+            time.sleep(600)
+            dprint(f"{id} has a pending order to sell {quantity} shares of {ticker}")
+        self.buy(id, ticker, quantity)

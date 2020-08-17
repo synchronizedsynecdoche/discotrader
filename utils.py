@@ -68,9 +68,6 @@ class Position(object):
         
         return self.quantity
 
-
-        
-
     
 
 
