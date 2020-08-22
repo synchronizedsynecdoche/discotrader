@@ -15,6 +15,9 @@ def dprint(*args, **kwargs):
     if DEBUG:
         print("[debug] " + " ".join(map(str, args)), **kwargs)
 
+def stringify(x):
+
+    return "{0:.2f}".format(x)
 
 class Side(str, enum.Enum):
     

@@ -83,7 +83,7 @@ class Trader(object):
         if u is None:
             return TraderResponse(False, "User doesn't exist!")
         
-        return TraderResponse(True, f"${u.buying_power}")
+        return TraderResponse(True, f"${stringify(u.buying_power)}")
 
 
     def buy(self, id: int, ticker: str, quantity: float) -> TraderResponse:
@@ -197,7 +197,7 @@ class Trader(object):
                 
                 for p in u.portfolio:
 
-                    answer += f"\n{p.ticker}:\n\tShares: {p.getQuantity()}\n\tAverage Cost: ${p.getAverageCost()}\n\tChange: {p.getTotalPriceChange()}\n\tPercent Change: {p.getPercentChange()}%"
+                    answer += f"\n{p.ticker}:\n\tShares: {stringify(p.getQuantity())}\n\tAverage Cost: ${stringify(p.getAverageCost())}\n\tChange: ${stringify(p.getTotalPriceChange())}\n\tPercent Change: {stringify(p.getPercentChange())}%"
                 
                 return TraderResponse(True, answer)
         

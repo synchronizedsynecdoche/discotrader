@@ -15,7 +15,7 @@ VERSION = 0
 
 class DiscoTrader(commands.Cog):
 
-    trader: Trader = None
+    trader: Trader
 
     def __init__(self, bot):
 
@@ -24,17 +24,6 @@ class DiscoTrader(commands.Cog):
         self.bot.add_cog(self)
         self.bot.run(TOKEN)
 
-    def ensureTraderExists(self) -> TraderResponse:
-
-        if self.trader is None:
-            self.trader = Trader()
-
-        if not self.trader.is_loaded:
-            
-            resp = self.trader.load()
-            return resp
-
-        return None
 
     @commands.command(name='ping')
     async def ping(self, ctx):
@@ -54,19 +43,9 @@ class DiscoTrader(commands.Cog):
             await ctx.send(AUTH_ERR)
         else:
             self.trader = Trader()
-        
-            await ctx.send("Initialized trader, don't forget to load!")
 
-    @commands.command(name='load')
-    async def load(self, ctx):
+            await ctx.send("Trader initialized and loaded")
 
-        if ctx.message.author.id != ADMIN:
-            await ctx.send(AUTH_ERR)
-            return
-
-        if self.trader is None or not self.trader.is_loaded:
-            resp = self.ensureTraderExists()
-            await ctx.send(resp.message)
 
     @commands.command(name='buy')
     async def buy(self, ctx, ticker: str, quantity: float):
@@ -84,9 +63,6 @@ class DiscoTrader(commands.Cog):
     @commands.command(name='sell')
     async def sell(self, ctx, ticker: str, quantity: float):
 
-        if self.trader is None or not self.trader.is_loaded:
-            resp = self.ensureTraderExists()
-            await ctx.send(resp.message)
         
         await ctx.send(f"Saw SELL from {ctx.message.author.id} for {quantity} shares of {ticker.upper()}")
     
@@ -95,11 +71,6 @@ class DiscoTrader(commands.Cog):
 
     @commands.command(name='bp')
     async def buyingPower(self, ctx):
-    
-        if self.trader is None or not self.trader.is_loaded:
-            resp = self.ensureTraderExists()
-            await ctx.send(resp.message)
-
 
         resp = self.trader.getBuyingPower(ctx.message.author.id)
         await ctx.send(resp.message)
@@ -110,9 +81,6 @@ class DiscoTrader(commands.Cog):
             await ctx.send(AUTH_ERR)
             return
 
-        if self.trader is None or not self.trader.is_loaded:
-            resp = self.ensureTraderExists()
-            await ctx.send(resp.message)
 
         resp = self.trader.backup()
         await ctx.send(resp.message)
@@ -123,10 +91,6 @@ class DiscoTrader(commands.Cog):
             await ctx.send(AUTH_ERR)
             return
 
-        if self.trader is None or not self.trader.is_loaded:
-            resp = self.ensureTraderExists()
-            await ctx.send(resp.message)
-
 
         self.trader.backup()
         self.trader.user_db = []
@@ -135,17 +99,14 @@ class DiscoTrader(commands.Cog):
     @commands.command(name='pf')
     async def pf(self, ctx):
 
-        if self.trader is None or not self.trader.is_loaded:
-            resp = self.ensureTraderExists()
-            await ctx.send(resp.message)
 
         resp = self.trader.getPortfolio(ctx.message.author.id)
 
         await ctx.send(resp.message)
+
     @commands.command(name='stock')
     async def stock(self, ctx, ticker):
 
-        self.ensureTraderExists()
         resp = self.trader.getStockInfo(ticker)
 
         await ctx.send(resp.message)
