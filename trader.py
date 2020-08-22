@@ -6,7 +6,6 @@ from datetime import datetime
 import time
 NewType("User", User)
 NewType("TraderResponse", TraderResponse)
-NewType("Trader", Trader)
 from utils import api, dprint
 import threading
 
@@ -19,7 +18,7 @@ class Trader(object):
     user_db: List[User] = []
     is_loaded: bool = False
 
-    def __init__(self) -> Trader:
+    def __init__(self):
         
         self.load()
 
