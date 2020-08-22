@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from trader import Trader
-from utils import TraderResponse
+from utils import TraderResponse, dprint
 from user import User
 from typing import Any, Dict, List
 import configparser
@@ -35,9 +35,11 @@ class DiscoTrader(commands.Cog):
             return resp
 
         return None
+
     @commands.command(name='ping')
     async def ping(self, ctx):
-
+        
+        dprint("pong! ")
         await ctx.send("pong! ")
 
     @commands.command(name='echo')
@@ -52,6 +54,7 @@ class DiscoTrader(commands.Cog):
             await ctx.send(AUTH_ERR)
         else:
             self.trader = Trader()
+        
             await ctx.send("Initialized trader, don't forget to load!")
 
     @commands.command(name='load')
@@ -111,8 +114,8 @@ class DiscoTrader(commands.Cog):
             resp = self.ensureTraderExists()
             await ctx.send(resp.message)
 
-        self.trader.backup()
-        await ctx.send("OK!")
+        resp = self.trader.backup()
+        await ctx.send(resp.message)
 
     @commands.command(name='clear')
     async def clear(self, ctx):

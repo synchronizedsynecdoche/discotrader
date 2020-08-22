@@ -6,15 +6,11 @@ from datetime import datetime
 import time
 NewType("User", User)
 NewType("TraderResponse", TraderResponse)
-from utils import api
+from utils import api, dprint
 import threading
 
-DEBUG = True 
+#DEBUG = True 
 FORCE_EXECUTION = False
-
-def dprint(*args, **kwargs):
-    if DEBUG:
-        print("[debug] " + " ".join(map(str, args)), **kwargs)
 
 class Trader(object):
 
@@ -22,18 +18,28 @@ class Trader(object):
     user_db: List[User] = []
     is_loaded: bool = False
 
-    def persist(self) -> None:
+    def persist(self) -> TraderResponse:
 
-        with open("user_db", "wb") as f:
-            pickle.dump(self.user_db, f)
-    
-    
-    def backup(self) -> None:
-
-        with open("user_db" + str(datetime.now()), "wb") as f:
-            pickle.dump(self.user_db, f)
+        try:
         
+            with open("user_db", "wb") as f:
+                pickle.dump(self.user_db, f)
+        
+        except Exception as e:
+            return TraderResponse(False, str(e))
+
+        return TraderResponse(True, "Persisted!")
     
+    def backup(self) -> TraderResponse:
+
+        try:
+            with open("user_db" + str(datetime.now()), "wb") as f:
+                pickle.dump(self.user_db, f)
+        except Exception as e:
+            return TraderResponse(False, str(e))
+
+        return TraderResponse(True, "Backed up a copy of the database!")   
+     
     def load(self) -> TraderResponse:
 
         self.is_loaded = True #even if we fail, we're considered loaded with a blank db
@@ -44,21 +50,20 @@ class Trader(object):
                 temp = pickle.load(f)
                 self.user_db = temp
                 return TraderResponse(True, "Loaded successfully!")
-        
 
         except FileNotFoundError as e:
         
-            dprint(e)
             return TraderResponse(False, str(e) + " Starting a new DB")
     
-    def addUser(self, id: int) -> None:
+    def addUser(self, id: int) -> TraderResponse:
 
         if id not in [u.ident for u in self.user_db]:
             temp = User(id)
             self.user_db.append(temp)
             self.persist()
+            TraderResponse(True, f"Added a new user: {temp}")
 
-    def locateUser(self, id: int) -> User:
+    def locateUser(self, id: int) -> User: #internal
 
         for u in self.user_db:
             if u.ident == id:
@@ -81,24 +86,20 @@ class Trader(object):
 
 
         if ticker is None or quantity <= 0:
-            dprint("Garbage in the args...")
             return TraderResponse(False, "Bad ticker or quantity!")
     
         purchaser = self.locateUser(id)
         if purchaser is None:
 
-            dprint(f"purchaser {id} doesn't exist!")
             return TraderResponse(False, f"purchaser {id} doesn't exist!")
         #turn this into a switch statement for excepts...
         try:
             price = api.get_last_trade(ticker).price
         except Exception as e:
-            dprint(e)
             return TraderResponse(False,ALP_ERR + str(e))
     
         if purchaser.buying_power < price * quantity:
         
-            dprint(f"Insufficient buying power! Have {purchaser.buying_power} but need {price * quantity}")
             return TraderResponse(False, f"Insufficient buying power! Have {purchaser.buying_power} but need {price * quantity}")
     
         ctime = api.get_clock()
@@ -112,7 +113,6 @@ class Trader(object):
 
             api.submit_order(ticker, quantity, Side.buy, Type.market, TiF.day)
         except Exception as e:
-            dprint(e)
             return TraderResponse(False, ALP_ERR + str(e))
 
         print(type(purchaser.portfolio))
@@ -125,29 +125,25 @@ class Trader(object):
 
         if ticker is None or quantity <= 0:
 
-            dprint("Garbage in the args...")
             return TraderResponse(False, "Bad ticker or quantity!")
     
         seller = self.locateUser(id)
         if seller is None:
 
-            dprint(f"seller {id} doesn't exist!")
             return TraderResponse(False, f"seller {id} doesn't exist!")
             
         #turn this into a switch statement for excepts...
         try:
             price = api.get_last_trade(ticker).price
         except Exception as e:
-            dprint(e)
+
             return TraderResponse(False, ALP_ERR + str(e))
     
         try:
             if quantity > seller.findPosition(ticker).quantity:
         
-                dprint(f"Insufficient holdings! Have {seller.findPosition(ticker).quantity} but need {quantity}")
                 return TraderResponse(False, f"Insufficient holdings! Have {seller.findPosition(ticker).quantity} but need {quantity}")
         except NoneType as e:
-            dprint(e)
             return TraderResponse(False, str(e) + f" are you sure you're holding {ticker}?")
 
         ctime = api.get_clock()
@@ -160,7 +156,6 @@ class Trader(object):
         try:
             api.submit_order(ticker, quantity, Side.sell, Type.market, TiF.day)
         except Exception as e:
-            dprint(e)
             return TraderResponse(False, ALP_ERR + str(e))
 
 
@@ -198,7 +193,8 @@ class Trader(object):
                 
                 for p in u.portfolio:
 
-                    answer += f"\n{p.ticker}:\n\t Shares: {p.getQuantity()}\n\t Average Cost: ${p.getAverageCost()}\n\t Change: {p.getTotalPriceChange()}\n\tPercent Change: {p.getPercentChange()}%"
+                    answer += f"\n{p.ticker}:\n\tShares: {p.getQuantity()}\n\tAverage Cost: ${p.getAverageCost()}\n\tChange: {p.getTotalPriceChange()}\n\tPercent Change: {p.getPercentChange()}%"
+                
                 return TraderResponse(True, answer)
         
         return TraderResponse(False, "No such user")
