@@ -18,6 +18,10 @@ class Trader(object):
     user_db: List[User] = []
     is_loaded: bool = False
 
+    def __init__(self) -> Trader:
+        
+        self.load()
+
     def persist(self) -> TraderResponse:
 
         try:
