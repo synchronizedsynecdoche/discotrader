@@ -6,6 +6,7 @@ from datetime import datetime
 import time
 NewType("User", User)
 NewType("TraderResponse", TraderResponse)
+NewType("Trader", Trader)
 from utils import api, dprint
 import threading
 
