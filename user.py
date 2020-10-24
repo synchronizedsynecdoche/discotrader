@@ -31,13 +31,13 @@ class User(object):
     
     def updatePosition(self, ticker: str, delta: float, price: float) -> None:
 
-        self.mutex.acquire(blocking=True)
+        self.mutex.acquire(blocking=False)
 
         for p in self.portfolio:
             if ticker == p.ticker:
                 p.update(delta, price)
                 return
-                
+
         self.portfolio.append(Position(ticker, delta, price, self.ident))
         self.buying_power -= price * delta
 

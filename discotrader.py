@@ -21,6 +21,7 @@ class DiscoTrader(commands.Cog):
 
         # does not spark joy        
         self.bot = bot
+        bot.remove_command('help')
         self.bot.add_cog(self)
         self.bot.run(TOKEN)
 
@@ -111,7 +112,7 @@ class DiscoTrader(commands.Cog):
 
         await ctx.send(resp.message)
 
-    @commands.command(name='?')
+    @commands.command(name='?', aliases=['help', 'h'])
     async def qmark(self, ctx):
 
         await ctx.send(f"""DiscoTrader v{VERSION}
@@ -123,6 +124,7 @@ class DiscoTrader(commands.Cog):
         ?load: initialize the trader and load the database
         ?backup: make a copy of the database object
         ?clear: clear the database
+        ?split TICKER R: manually split stocks by a ratio R 
     User Commands:
         ?buy TICKER X: purchase X shares of TICKER
         ?sell TICKER X: sell X shares of TICKER
@@ -130,7 +132,14 @@ class DiscoTrader(commands.Cog):
         ?pf: get your full portfolio
         ?stock TICKER: get information about a stock
         ??: Display this message
-        ?help: alias for ??""")         
+        ?help and ?h: alias for ??""")         
     
+    @commands.command(name='split')
+    async def split(self, ctx, ticker, ratio):
+        if ctx.message.author.id != ADMIN:
+            await ctx.send(AUTH_ERR)
+            return
+        resp = self.trader.fixAfterSplit(ticker, ratio)
 
+        await ctx.send("ratio")
 dt = DiscoTrader(commands.Bot(command_prefix='?'))

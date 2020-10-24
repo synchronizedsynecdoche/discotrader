@@ -22,9 +22,9 @@ class Trader(object):
         
         self.mutex = threading.Lock()
         
-        self.mutex.acquire(blocking=True)
+        self.mutex.acquire(blocking=False)
         self.load()
-        self.mutex.acquire(blocking=True)
+        self.mutex.acquire(blocking=False)
 
     def persist(self) -> TraderResponse:
 
@@ -32,7 +32,7 @@ class Trader(object):
         
             with open("user_db", "wb") as f:
 
-                self.mutex.acquire(blocking=True)
+                self.mutex.acquire(blocking=False)
                 pickle.dump(self.user_db, f)
                 self.mutex.release()
 
@@ -46,7 +46,7 @@ class Trader(object):
         try:
             with open("user_db" + str(datetime.now()), "wb") as f:
                 
-                self.mutex.acquire(blocking=True)
+                self.mutex.acquire(blocking=False)
                 pickle.dump(self.user_db, f)
                 self.mutex.release()
         
@@ -64,7 +64,7 @@ class Trader(object):
             
                 temp = pickle.load(f)
                 
-                self.mutex.acquire(blocking=True)
+                self.mutex.acquire(blocking=False)
                 self.user_db = temp
                 self.mutex.release()
 
@@ -80,7 +80,7 @@ class Trader(object):
 
             temp = User(id)
             
-            self.mutex.acquire(blocking=True)
+            self.mutex.acquire(blocking=False)
             self.user_db.append(temp)
             self.mutex.release()
             
@@ -221,4 +221,20 @@ class Trader(object):
                 return TraderResponse(True, answer)
         
         return TraderResponse(False, "No such user")
-                
+
+    def fixAfterSplit(self, ticker: str, ratio: int) -> TraderResponse:
+
+        if not ratio.isnumeric():
+            return TraderResponse(False, "Bad ratio")
+
+        ratio = int(ratio)
+        self.mutex.acquire()
+        for u in self.user_db:
+            for p in u.portfolio:
+                if p.ticker == ticker:
+                    p.quantity *= ratio
+        self.mutex.release()
+
+        return TraderResponse(True, "Stock successfully split!")
+
+
