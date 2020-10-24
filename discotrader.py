@@ -141,5 +141,5 @@ class DiscoTrader(commands.Cog):
             return
         resp = self.trader.fixAfterSplit(ticker, ratio)
 
-        await ctx.send("ratio")
+        await ctx.send(resp.message)
 dt = DiscoTrader(commands.Bot(command_prefix='?'))
