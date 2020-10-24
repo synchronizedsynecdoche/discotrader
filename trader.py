@@ -9,7 +9,7 @@ NewType("TraderResponse", TraderResponse)
 from utils import api, dprint
 import threading
 
-#DEBUG = True 
+DEBUG = True 
 FORCE_EXECUTION = False
 
 class Trader(object):
@@ -20,15 +20,22 @@ class Trader(object):
 
     def __init__(self):
         
+        self.mutex = threading.Lock()
+        
+        self.mutex.acquire(blocking=True)
         self.load()
+        self.mutex.acquire(blocking=True)
 
     def persist(self) -> TraderResponse:
 
         try:
         
             with open("user_db", "wb") as f:
+
+                self.mutex.acquire(blocking=True)
                 pickle.dump(self.user_db, f)
-        
+                self.mutex.release()
+
         except Exception as e:
             return TraderResponse(False, str(e))
 
@@ -38,7 +45,11 @@ class Trader(object):
 
         try:
             with open("user_db" + str(datetime.now()), "wb") as f:
+                
+                self.mutex.acquire(blocking=True)
                 pickle.dump(self.user_db, f)
+                self.mutex.release()
+        
         except Exception as e:
             return TraderResponse(False, str(e))
 
@@ -52,7 +63,11 @@ class Trader(object):
             with open("user_db", "rb") as f:
             
                 temp = pickle.load(f)
+                
+                self.mutex.acquire(blocking=True)
                 self.user_db = temp
+                self.mutex.release()
+
                 return TraderResponse(True, "Loaded successfully!")
 
         except FileNotFoundError as e:
@@ -62,8 +77,13 @@ class Trader(object):
     def addUser(self, id: int) -> TraderResponse:
 
         if id not in [u.ident for u in self.user_db]:
+
             temp = User(id)
+            
+            self.mutex.acquire(blocking=True)
             self.user_db.append(temp)
+            self.mutex.release()
+            
             self.persist()
             TraderResponse(True, f"Added a new user: {temp}")
 
@@ -118,8 +138,7 @@ class Trader(object):
             api.submit_order(ticker, quantity, Side.buy, Type.market, TiF.day)
         except Exception as e:
             return TraderResponse(False, ALP_ERR + str(e))
-
-        print(type(purchaser.portfolio))
+    
         purchaser.updatePosition(ticker, quantity, price)
 
         self.persist()
@@ -147,7 +166,7 @@ class Trader(object):
             if quantity > seller.findPosition(ticker).quantity:
         
                 return TraderResponse(False, f"Insufficient holdings! Have {seller.findPosition(ticker).quantity} but need {quantity}")
-        except NoneType as e:
+        except Exception as e:
             return TraderResponse(False, str(e) + f" are you sure you're holding {ticker}?")
 
         ctime = api.get_clock()
@@ -197,7 +216,7 @@ class Trader(object):
                 
                 for p in u.portfolio:
 
-                    answer += f"\n{p.ticker}:\n\tShares: {stringify(p.getQuantity())}\n\tAverage Cost: ${stringify(p.getAverageCost())}\n\tChange: ${stringify(p.getTotalPriceChange())}\n\tPercent Change: {stringify(p.getPercentChange())}%"
+                    answer += f"\n{p.ticker}:\n\tShares: {p.getQuantity()}\n\tAverage Cost: ${stringify(p.getAverageCost())}\n\tChange: ${stringify(p.getTotalPriceChange())}\n\tPercent Change: {stringify(p.getPercentChange())}%"
                 
                 return TraderResponse(True, answer)
         
