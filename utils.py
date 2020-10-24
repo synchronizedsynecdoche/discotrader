@@ -97,3 +97,7 @@ class Position(object):
             return 0
         
         return 100 * (self.getValue() - self.sigma_cost) / self.getValue() 
+
+    def split(self, ratio) -> None:
+        self.quantity *= ratio
+        

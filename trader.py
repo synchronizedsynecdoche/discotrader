@@ -228,12 +228,12 @@ class Trader(object):
             return TraderResponse(False, "Bad ratio")
 
         ratio = int(ratio)
-        self.mutex.acquire()
+        #self.mutex.acquire(blocking=False)
         for u in self.user_db:
             for p in u.portfolio:
                 if p.ticker == ticker:
-                    p.quantity *= ratio
-        self.mutex.release()
+                    p.split(ratio)
+        #self.mutex.release()
 
         return TraderResponse(True, "Stock successfully split!")
 

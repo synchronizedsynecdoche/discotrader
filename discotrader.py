@@ -139,7 +139,7 @@ class DiscoTrader(commands.Cog):
         if ctx.message.author.id != ADMIN:
             await ctx.send(AUTH_ERR)
             return
-        resp = self.trader.fixAfterSplit(ticker, ratio)
+        resp = self.trader.fixAfterSplit(ticker.upper(), ratio)
 
         await ctx.send(resp.message)
 dt = DiscoTrader(commands.Bot(command_prefix='?'))
