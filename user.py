@@ -7,7 +7,7 @@ class User(object):
     portfolio: List[Position]
     buying_power: float
     ident: int
-    mutex: Lock
+    #mutex: Lock
     
     def __init__(self, ident: int):
 
@@ -15,7 +15,7 @@ class User(object):
         self.portfolio = list()
         self.buying_power = 10000
         self.ident = ident
-        self.mutex = Lock()
+        #self.mutex = Lock()
 
     def __str__(self) -> str:
         return f"User object with ident={self.ident}"
@@ -31,7 +31,7 @@ class User(object):
     
     def updatePosition(self, ticker: str, delta: float, price: float) -> None:
 
-        self.mutex.acquire(blocking=False)
+        #self.mutex.acquire(blocking=False)
 
         for p in self.portfolio:
             if ticker == p.ticker:
@@ -41,7 +41,7 @@ class User(object):
         self.portfolio.append(Position(ticker, delta, price, self.ident))
         self.buying_power -= price * delta
 
-        self.mutex.release()
+        #self.mutex.release()
     
     def findPosition(self, ticker) -> Position:
 

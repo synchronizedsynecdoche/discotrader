@@ -52,7 +52,7 @@ class DiscoTrader(commands.Cog):
     async def buy(self, ctx, ticker: str, quantity: float):
 
         if self.trader is None or not self.trader.is_loaded:
-            resp = self.ensureTraderExists()
+            resp =  self.ensureTraderExists()
             await ctx.send(resp.message)
 
         self.trader.addUser(ctx.message.author.id)
