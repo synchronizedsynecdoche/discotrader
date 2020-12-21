@@ -53,17 +53,19 @@ class TraderResponse(object):
 
 class Position(object):
 
+    owner: int = 0
     ticker: str
     quantity: float = 0
     sigma_cost: float = 0
-    owner: int = 0
+    identity: str 
 
     def __init__(self, ticker, init_quantity, init_price_per_share, owner):
 
+        self.owner = owner
         self.ticker = ticker
         self.quantity = init_quantity
         self.sigma_cost = init_quantity * init_price_per_share
-        self.owner = owner
+        self.identity = f"{owner}:{ticker}"
 
 
     def getValue(self) -> float:
@@ -100,4 +102,8 @@ class Position(object):
 
     def split(self, ratio) -> None:
         self.quantity *= ratio
+    
+    def package(self) -> str:
+
+        return f"INSERT INTO positions VALUES('{self.identity}',{self.owner}, '{self.ticker}', {self.quantity}, {self.sigma_cost})"
         
