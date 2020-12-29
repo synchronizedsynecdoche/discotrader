@@ -1,6 +1,6 @@
 import alpaca_trade_api as ata
 from typing import List, Any, NewType
-from utils import Position
+from position import Position
 from threading import Lock
 class User(object):
     

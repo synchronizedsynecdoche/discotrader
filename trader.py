@@ -1,16 +1,18 @@
 from typing import List, Dict, Any, NewType
 from utils import *
+from position import Position
 from user import User
 import pickle
 from datetime import datetime
 import time
-NewType("User", User)
-NewType("TraderResponse", TraderResponse)
 from utils import api, dprint
 import threading
 
-DEBUG = True 
-FORCE_EXECUTION = False
+NewType("User", User)
+NewType("TraderResponse", TraderResponse)
+
+DEBUG: bool = True 
+FORCE_EXECUTION: bool = False
 
 class Trader(object):
 
@@ -97,9 +99,7 @@ class Trader(object):
 
     def getBuyingPower(self, id: int) -> TraderResponse:
 
-        worth: float = 0
-        u: User = self.locateUser(id)
-
+        u = self.locateUser(id)
         if u is None:
             return TraderResponse(False, "User doesn't exist!")
         
@@ -208,7 +208,7 @@ class Trader(object):
 
     def getPortfolio(self, id: int) -> TraderResponse:
 
-        answer: str = ""
+        answer = ""
 
         for u in self.user_db:
 

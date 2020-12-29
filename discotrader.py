@@ -6,12 +6,12 @@ from user import User
 from typing import Any, Dict, List
 import configparser
 
-config = configparser.ConfigParser()
+config: configparser.ConfigParser = configparser.ConfigParser()
 config.read('config.ini')
 TOKEN: str = config['DISCORD']['TOKEN']
 ADMIN: int = int(config['DISCORD']['ADMIN'])
 AUTH_ERR: str = "Unauthorized Action!"
-VERSION = 0
+VERSION: int = 0
 
 class DiscoTrader(commands.Cog):
 
@@ -52,7 +52,7 @@ class DiscoTrader(commands.Cog):
     async def buy(self, ctx, ticker: str, quantity: float):
 
         if self.trader is None or not self.trader.is_loaded:
-            resp =  self.ensureTraderExists()
+            resp = self.ensureTraderExists()
             await ctx.send(resp.message)
 
         self.trader.addUser(ctx.message.author.id)
