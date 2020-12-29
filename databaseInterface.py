@@ -41,7 +41,7 @@ class DatabaseInterface(object):
             self.connection.commit()
         except sqlite3.OperationalError as e:
             dprint(f"Operatitonal error caught: {e}, db already exists?")
-    def commitUser(self, u: User):
+    def commitUser(self, u: User) -> bool:
         
         try:
             self.cursor.execute(f"INSERT INTO users VALUES({u.ident},{u.buying_power})")
@@ -56,8 +56,6 @@ class DatabaseInterface(object):
             
             else: # ouch
                 return False
-        
-        return True
 
     def check(self):
         self.cursor.execute("SELECT * FROM users")
@@ -67,5 +65,6 @@ class DatabaseInterface(object):
 
 dbi = DatabaseInterface("test.db")
 user = User(1)
+user.updatePosition("PLTR", 10, 100)
 dbi.commitUser(user)
 dbi.check()
