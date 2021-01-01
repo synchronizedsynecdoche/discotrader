@@ -1,5 +1,3 @@
-
-
 import sqlite3
 from position import Position
 from user import User
@@ -34,37 +32,49 @@ class DatabaseInterface(object):
     def __init__(self, filename):
         self.connection = sqlite3.connect(filename)
         self.cursor = self.connection.cursor()
-        try:
-            self.cursor.execute("""CREATE TABLE positions(
+
+        self.cursor.execute("""CREATE TABLE IF NOT exists positions(
                 identity string PRIMARY KEY, ticker string, quantity int, sigma_cost float, owner int)""")
-            self.cursor.execute("CREATE TABLE users(identity int PRIMARY KEY, buying_power float)")
-            self.connection.commit()
-        except sqlite3.OperationalError as e:
-            dprint(f"Operatitonal error caught: {e}, db already exists?")
+        self.cursor.execute("CREATE TABLE IF NOT exists users(ident int PRIMARY KEY, buying_power float)")
+        self.connection.commit()
     def commitUser(self, u: User) -> bool:
         
         try:
-            self.cursor.execute(f"INSERT INTO users VALUES({u.ident},{u.buying_power})")
+            self.cursor.execute(f"""INSERT OR REPLACE INTO users VALUES({u.ident},{u.buying_power})""")
             self.connection.commit()
 
-        except sqlite3.IntegrityError as e:
-
-            self.cursor.execute(f"SELECT * FROM users WHERE identity IS {u.ident}")
-            if len(self.cursor.fetchall()) == 1:
-            
-                dprint("Caught IntegrityError, but was from existing user")
-            
-            else: # ouch
+        except Exception as e:
+            dprint(e)
+            return False
+        
+        for p in u.portfolio:
+            if not self.commitPosition(p):
                 return False
 
+        return True
+    def commitPosition(self, p: Position) -> bool:
+        try:
+            self.cursor.execute(f"INSERT OR REPLACE INTO positions {p.package()}")
+            return True
+        except Exception as e:
+            dprint(e)
+        
+        return False
     def check(self):
         self.cursor.execute("SELECT * FROM users")
         rows = self.cursor.fetchall()
         for row in rows:
             dprint(row)
+        
+        self.cursor.execute("SELECT * FROM positions")
+        rows = self.cursor.fetchall()
 
-dbi = DatabaseInterface("test.db")
+        for row in rows:
+            dprint(rows)
+    
+    
+dbi = DatabaseInterface("db.db")
 user = User(1)
-user.updatePosition("PLTR", 10, 100)
+user.updatePosition("PLTR", 9, 100)
 dbi.commitUser(user)
 dbi.check()
