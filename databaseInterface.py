@@ -37,6 +37,15 @@ class DatabaseInterface(object):
                 identity string PRIMARY KEY, ticker string, quantity int, sigma_cost float, owner int)""")
         self.cursor.execute("CREATE TABLE IF NOT exists users(ident int PRIMARY KEY, buying_power float)")
         self.connection.commit()
+
+
+    def commitUsers(self, users: List[User])-> bool:
+        for u in users:
+            if not self.commitUser(u):
+                return False
+        
+        return True
+
     def commitUser(self, u: User) -> bool:
         
         try:
@@ -92,10 +101,3 @@ class DatabaseInterface(object):
         return returnable
 
     
-    
-dbi = DatabaseInterface("db.db")
-user = User(1)
-user.updatePosition("PLTR", 10, 100)
-dbi.commitUser(user)
-dbi.check()
-dprint([p.package() for p in dbi.retrieveUsers()[0].portfolio])
