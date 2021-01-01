@@ -72,9 +72,28 @@ class DatabaseInterface(object):
         for row in rows:
             dprint(rows)
     
+    def retrieveUsers(self) -> List[User]:
+        returnable = []
+        self.cursor.execute("SELECT * FROM users")
+        users = self.cursor.fetchall()
+        for user in users:
+            
+            t_user = User(user[0], buying_power=user[1])
+            self.cursor.execute(f"SELECT * FROM positions WHERE owner={t_user.ident}")
+            positions = self.cursor.fetchall()
+            
+            for position in positions:
+                t_user.portfolio.append(Position(position[1], position[2], position[3]/position[2],t_user.ident))
+            
+            returnable.append(t_user)
+        
+        return returnable
+
+    
     
 dbi = DatabaseInterface("db.db")
 user = User(1)
-user.updatePosition("PLTR", 9, 100)
+user.updatePosition("PLTR", 10, 100)
 dbi.commitUser(user)
 dbi.check()
+dprint([p.package() for p in dbi.retrieveUsers()[0].portfolio])
