@@ -83,6 +83,8 @@ class DatabaseInterface(object):
             positions = self.cursor.fetchall()
             
             for position in positions:
+                if position[3] == 0:
+                    continue
                 t_user.portfolio.append(Position(position[1], position[2], position[3]/position[2],t_user.ident))
             
             returnable.append(t_user)
