@@ -67,6 +67,7 @@ class DatabaseInterface(object):
     def commitPosition(self, p: Position) -> bool:
         try:
             self.cursor.execute(f"INSERT OR REPLACE INTO positions {p.package()}")
+            self.connection.commit()
             return True
         except Exception as e:
             utils.dprint(e)
