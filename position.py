@@ -1,4 +1,4 @@
-
+import utils
 class Position(object):
 
     owner: int = 0
@@ -18,7 +18,7 @@ class Position(object):
 
     def getValue(self) -> float:
 
-        return self.quantity * api.get_last_trade(self.ticker).price
+        return self.quantity * utils.api.get_last_trade(self.ticker).price
 
     def update(self, delta, price_per_share) -> None:
 

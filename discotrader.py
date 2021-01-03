@@ -44,6 +44,7 @@ class DiscoTrader(commands.Cog):
             await ctx.send(AUTH_ERR)
         else:
             self.trader = Trader()
+            self.trader.load()
 
             await ctx.send("Trader initialized and loaded")
 
@@ -51,9 +52,6 @@ class DiscoTrader(commands.Cog):
     @commands.command(name='buy')
     async def buy(self, ctx, ticker: str, quantity: float):
 
-        if self.trader is None or not self.trader.is_loaded:
-            resp = self.ensureTraderExists()
-            await ctx.send(resp.message)
 
         self.trader.addUser(ctx.message.author.id)
         await ctx.send(f"Saw BUY from {ctx.message.author.id} for {quantity} shares of {ticker.upper()}")

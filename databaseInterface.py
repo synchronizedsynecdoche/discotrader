@@ -1,7 +1,7 @@
 import sqlite3
 from position import Position
 from user import User
-from utils import *
+import utils
 from typing import List, Dict, Any, NewType
 NewType("User", User)
 NewType("Position", Position)
@@ -24,6 +24,7 @@ rows = cursorObj.fetchall()
 for row in rows:
     print(row)
 '''
+
 class DatabaseInterface(object):
     
     connection = None
@@ -53,7 +54,7 @@ class DatabaseInterface(object):
             self.connection.commit()
 
         except Exception as e:
-            dprint(e)
+            utils.utils.dprint(e)
             return False
         
         for p in u.portfolio:
@@ -64,22 +65,23 @@ class DatabaseInterface(object):
     def commitPosition(self, p: Position) -> bool:
         try:
             self.cursor.execute(f"INSERT OR REPLACE INTO positions {p.package()}")
+            utils.dprint("hi!")
             return True
         except Exception as e:
-            dprint(e)
+            utils.dprint(e)
         
         return False
     def check(self):
         self.cursor.execute("SELECT * FROM users")
         rows = self.cursor.fetchall()
         for row in rows:
-            dprint(row)
+            utils.dprint(row)
         
         self.cursor.execute("SELECT * FROM positions")
         rows = self.cursor.fetchall()
 
         for row in rows:
-            dprint(rows)
+            utils.dprint(rows)
     
     def retrieveUsers(self) -> List[User]:
         returnable = []

@@ -9,12 +9,13 @@ class User(object):
     ident: int
     #mutex: Lock
     
-    def __init__(self, ident: int):
+    def __init__(self, ident: int, buying_power=10000):
 
         print(f"Spawned an instance of User with ident={ident}")
         self.portfolio = list()
-        self.buying_power = 10000
+        self.buying_power = buying_power
         self.ident = ident
+
         #self.mutex = Lock()
 
     def __str__(self) -> str:

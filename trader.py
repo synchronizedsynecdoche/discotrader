@@ -5,17 +5,21 @@ from user import User
 import pickle
 from datetime import datetime
 import time
-from utils import api, dprint
 import threading
+import configparser
+from databaseInterface import DatabaseInterface
+
+DB_NAME = "disco.db"
+dbi = DatabaseInterface(DB_NAME)
 
 NewType("User", User)
 NewType("TraderResponse", TraderResponse)
 
 DEBUG: bool = True 
-FORCE_EXECUTION: bool = False
+FORCE_EXECUTION: bool = True
+LEGACY_LOAD: bool = False
 
 class Trader(object):
-
 
     user_db: List[User] = []
     is_loaded: bool = False
@@ -25,56 +29,67 @@ class Trader(object):
         self.mutex = threading.Lock()
         
         self.mutex.acquire(blocking=False)
-        self.load()
         self.mutex.acquire(blocking=False)
 
     def persist(self) -> TraderResponse:
 
-        try:
+        if LEGACY_LOAD:
+            try:
         
-            with open("user_db", "wb") as f:
+                with open("user_db", "wb") as f:
 
-                self.mutex.acquire(blocking=False)
-                pickle.dump(self.user_db, f)
-                self.mutex.release()
+                    self.mutex.acquire(blocking=False)
+                    pickle.dump(self.user_db, f)
+                    self.mutex.release()
 
-        except Exception as e:
-            return TraderResponse(False, str(e))
+            except Exception as e:
+                return TraderResponse(False, str(e))
 
-        return TraderResponse(True, "Persisted!")
+            return TraderResponse(True, "persisted!")
+        else:
+            dbi.commitUsers(self.user_db)
+            return TraderResponse(True, "persisted!")
     
     def backup(self) -> TraderResponse:
 
-        try:
-            with open("user_db" + str(datetime.now()), "wb") as f:
+        if LEGACY_LOAD:
+            try:
+                with open("user_db" + str(datetime.now()), "wb") as f:
                 
-                self.mutex.acquire(blocking=False)
-                pickle.dump(self.user_db, f)
-                self.mutex.release()
+                    self.mutex.acquire(blocking=False)
+                    pickle.dump(self.user_db, f)
+                    self.mutex.release()
         
-        except Exception as e:
-            return TraderResponse(False, str(e))
+            except Exception as e:
+                return TraderResponse(False, str(e))
 
-        return TraderResponse(True, "Backed up a copy of the database!")   
-     
+            return TraderResponse(True, "Backed up a copy of the database!")   
+        
+        else:
+            self.persist()
+            return TraderResponse(True, "Backed up the database!")   
     def load(self) -> TraderResponse:
 
-        self.is_loaded = True #even if we fail, we're considered loaded with a blank db
-        try:
+        if LEGACY_LOAD:
+            self.is_loaded = True #even if we fail, we're considered loaded with a blank db
+            try:
 
-            with open("user_db", "rb") as f:
+                with open("user_db", "rb") as f:
             
-                temp = pickle.load(f)
+                    temp = pickle.load(f)
                 
-                self.mutex.acquire(blocking=False)
-                self.user_db = temp
-                self.mutex.release()
+                    self.mutex.acquire(blocking=False)
+                    self.user_db = temp
+                    self.mutex.release()
 
-                return TraderResponse(True, "Loaded successfully!")
-
-        except FileNotFoundError as e:
+            except FileNotFoundError as e:
         
-            return TraderResponse(False, str(e) + " Starting a new DB")
+                return TraderResponse(False, str(e) + " Starting a new DB")
+        else:
+            self.user_db = dbi.retrieveUsers()
+
+
+        return TraderResponse(True, "loaded successfully!")
     
     def addUser(self, id: int) -> TraderResponse:
 
@@ -183,6 +198,7 @@ class Trader(object):
 
 
         seller.updatePosition(ticker, -quantity, price)
+
         self.persist()
         return TraderResponse(True, "Success!")
 
