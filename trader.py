@@ -16,7 +16,7 @@ NewType("TraderResponse", TraderResponse)
 
 DEBUG: bool = True 
 FORCE_EXECUTION: bool = True
-LEGACY_LOAD: bool = False
+LEGACY_INTERFACE: bool = False
 
 class Trader(object):
 
@@ -25,7 +25,7 @@ class Trader(object):
     dbi = None
     def __init__(self):
         
-        self.dbi = DatabaseInterface(DB_NAME)
+        self.dbi = DatabaseInterface(filename=DB_NAME)
         self.mutex = threading.Lock()
         
         self.mutex.acquire(blocking=False)
@@ -35,7 +35,7 @@ class Trader(object):
 
         if not self.is_loaded:
             return TraderResponse(False, "not loaded!")
-        if LEGACY_LOAD:
+        if LEGACY_INTERFACE:
             try:
         
                 with open("user_db", "wb") as f:
@@ -56,7 +56,7 @@ class Trader(object):
 
         if not self.is_loaded:
             return TraderResponse(False, "not loaded!")
-        if LEGACY_LOAD:
+        if LEGACY_INTERFACE:
             try:
                 with open("user_db" + str(datetime.now()), "wb") as f:
                 
@@ -74,7 +74,9 @@ class Trader(object):
             return TraderResponse(True, "Backed up the database!")   
     def load(self) -> TraderResponse:
 
-        if LEGACY_LOAD:
+        self.is_loaded = True #even if we fail, we're considered loaded with a blank db
+
+        if LEGACY_INTERFACE:
             self.is_loaded = True #even if we fail, we're considered loaded with a blank db
             try:
 

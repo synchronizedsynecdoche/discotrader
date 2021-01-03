@@ -56,7 +56,7 @@ class DiscoTrader(commands.Cog):
             self.trader_init(ctx, override=True)
 
         self.trader.addUser(ctx.message.author.id)
-        await ctx.send(f"Saw BUY from {ctx.message.author.id} for {quantity} shares of {ticker.upper()}")
+        #await ctx.send(f"Saw BUY from {ctx.message.author.id} for {quantity} shares of {ticker.upper()}")
     
         resp = self.trader.buy(ctx.message.author.id,ticker.upper(),quantity)
         await ctx.send(resp.message)
@@ -66,7 +66,7 @@ class DiscoTrader(commands.Cog):
 
         if self.trader is None:
             self.trader_init(ctx, override=True)
-        await ctx.send(f"Saw SELL from {ctx.message.author.id} for {quantity} shares of {ticker.upper()}")
+        #await ctx.send(f"Saw SELL from {ctx.message.author.id} for {quantity} shares of {ticker.upper()}")
     
         resp = self.trader.sell(ctx.message.author.id,ticker.upper(),quantity)
         await ctx.send(resp.message)

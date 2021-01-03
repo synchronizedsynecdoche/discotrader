@@ -31,7 +31,7 @@ class DatabaseInterface(object):
     cursor = None
     filename = None
     
-    def __init__(self, filename):
+    def __init__(self, filename="disco.db"):
         self.connection = sqlite3.connect(filename)
         self.cursor = self.connection.cursor()
         self.filename = filename
@@ -67,7 +67,6 @@ class DatabaseInterface(object):
     def commitPosition(self, p: Position) -> bool:
         try:
             self.cursor.execute(f"INSERT OR REPLACE INTO positions {p.package()}")
-            utils.dprint("hi!")
             return True
         except Exception as e:
             utils.dprint(e)
