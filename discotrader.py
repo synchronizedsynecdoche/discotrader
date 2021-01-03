@@ -39,8 +39,8 @@ class DiscoTrader(commands.Cog):
 
 
     @commands.command(name='init')
-    async def init(self, ctx):
-        if ctx.message.author.id != ADMIN:
+    async def trader_init(self, ctx, override=False):
+        if ctx.message.author.id != ADMIN or override:
             await ctx.send(AUTH_ERR)
         else:
             self.trader = Trader()
@@ -52,6 +52,8 @@ class DiscoTrader(commands.Cog):
     @commands.command(name='buy')
     async def buy(self, ctx, ticker: str, quantity: float):
 
+        if self.trader is None:
+            self.trader_init(ctx, override=True)
 
         self.trader.addUser(ctx.message.author.id)
         await ctx.send(f"Saw BUY from {ctx.message.author.id} for {quantity} shares of {ticker.upper()}")
@@ -62,7 +64,8 @@ class DiscoTrader(commands.Cog):
     @commands.command(name='sell')
     async def sell(self, ctx, ticker: str, quantity: float):
 
-        
+        if self.trader is None:
+            self.trader_init(ctx, override=True)
         await ctx.send(f"Saw SELL from {ctx.message.author.id} for {quantity} shares of {ticker.upper()}")
     
         resp = self.trader.sell(ctx.message.author.id,ticker.upper(),quantity)
