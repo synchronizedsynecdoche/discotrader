@@ -10,7 +10,6 @@ import configparser
 from databaseInterface import DatabaseInterface
 
 DB_NAME = "disco.db"
-dbi = DatabaseInterface(DB_NAME)
 
 NewType("User", User)
 NewType("TraderResponse", TraderResponse)
@@ -23,9 +22,10 @@ class Trader(object):
 
     user_db: List[User] = []
     is_loaded: bool = False
-
+    dbi = None
     def __init__(self):
         
+        self.dbi = DatabaseInterface(DB_NAME)
         self.mutex = threading.Lock()
         
         self.mutex.acquire(blocking=False)
@@ -33,6 +33,8 @@ class Trader(object):
 
     def persist(self) -> TraderResponse:
 
+        if not self.is_loaded:
+            return TraderResponse(False, "not loaded!")
         if LEGACY_LOAD:
             try:
         
@@ -47,11 +49,13 @@ class Trader(object):
 
             return TraderResponse(True, "persisted!")
         else:
-            dbi.commitUsers(self.user_db)
+            self.dbi.commitUsers(self.user_db)
             return TraderResponse(True, "persisted!")
     
     def backup(self) -> TraderResponse:
 
+        if not self.is_loaded:
+            return TraderResponse(False, "not loaded!")
         if LEGACY_LOAD:
             try:
                 with open("user_db" + str(datetime.now()), "wb") as f:
@@ -66,7 +70,7 @@ class Trader(object):
             return TraderResponse(True, "Backed up a copy of the database!")   
         
         else:
-            self.persist()
+            self.dbi.backup()
             return TraderResponse(True, "Backed up the database!")   
     def load(self) -> TraderResponse:
 
@@ -86,7 +90,7 @@ class Trader(object):
         
                 return TraderResponse(False, str(e) + " Starting a new DB")
         else:
-            self.user_db = dbi.retrieveUsers()
+            self.user_db = self.dbi.retrieveUsers()
 
 
         return TraderResponse(True, "loaded successfully!")

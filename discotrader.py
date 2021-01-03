@@ -103,7 +103,6 @@ class DiscoTrader(commands.Cog):
 
 
         resp = self.trader.getPortfolio(ctx.message.author.id)
-
         await ctx.send(resp.message)
 
     @commands.command(name='stock')

@@ -29,10 +29,12 @@ class DatabaseInterface(object):
     
     connection = None
     cursor = None
+    filename = None
     
     def __init__(self, filename):
         self.connection = sqlite3.connect(filename)
         self.cursor = self.connection.cursor()
+        self.filename = filename
 
         self.cursor.execute("""CREATE TABLE IF NOT exists positions(
                 identity string PRIMARY KEY, ticker string, quantity int, sigma_cost float, owner int)""")
@@ -102,4 +104,8 @@ class DatabaseInterface(object):
         
         return returnable
 
-    
+    def backup(self) -> bool:
+        bak = sqlite3.connect(self.filename +".bak")
+        with bak:
+            self.connection.backup(bak)
+        bak.close()
