@@ -37,11 +37,11 @@ class User(object):
         for p in self.portfolio:
             if ticker == p.ticker:
                 p.update(delta, price)
-                break
+                self.buying_power -= price * delta
+                return
 
         self.portfolio.append(Position(ticker, delta, price, self.ident))
         self.buying_power -= price * delta
-
         #self.mutex.release()
     
     def findPosition(self, ticker) -> Position:
