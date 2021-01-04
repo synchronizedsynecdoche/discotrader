@@ -37,7 +37,7 @@ class User(object):
         for p in self.portfolio:
             if ticker == p.ticker:
                 p.update(delta, price)
-                return
+                break
 
         self.portfolio.append(Position(ticker, delta, price, self.ident))
         self.buying_power -= price * delta
