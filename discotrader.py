@@ -144,7 +144,7 @@ class DiscoTrader(commands.Cog):
 
         await ctx.send(resp.message)
     
-    @commands.command(name='cog')
+    @commands.command(name='coggers')
     async def cog(self, ctx):
         message = get_cogcision()
 
