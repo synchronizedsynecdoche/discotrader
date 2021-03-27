@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 
@@ -5,10 +6,12 @@ import asyncio
 
 import asyncpraw
 
+from utils import api, REDDIT_SECRET, REDDIT_ID
+
 async def get_cogcision() -> str:
     reddit = asyncpraw.Reddit(
-        client_id=os.getenv("CLIENT_ID"),
-        client_secret=os.getenv("CLIENT_SECRET"),
+        client_id=REDDIT_ID,
+        client_secret=REDDIT_SECRET,
         user_agent="prawddit",
     )
 
@@ -39,10 +42,22 @@ async def get_cogcision() -> str:
 
                 if symbol:
                     symbol_list.append(word)
-
-    # randomly pick a stock
-    stock = random.choice(symbol_list)
-
+    
+    counter = 0
+    while True:
+        # randomly pick a stock
+        symbol = random.choice(symbol_list)
+        try:
+            print(f"trying {symbol}")
+            stock = api.get_last_trade(symbol)
+            break
+        except:
+            counter += 1
+            if counter == 100:
+                return "SORRY IM TOO WEAK. THESE FOOLS ARE SPEWING BULLSHIT."
+                break
+            pass
+        
     # # randomly pick buy/sell
     action = random.choice(["BUY", "SELL"])
 
@@ -50,8 +65,7 @@ async def get_cogcision() -> str:
     amount = random.randint(1, 100)
 
     # # return sentence
-    print(f"I WILL {action} {amount} share{'s' if amount >= 1 else ''} of {stock}.")
-    return f"I WILL {action} {amount} share{'s' if amount >= 1 else ''} of {stock}."
+    return (f"I WILL {action} {amount} SHARE{'S' if amount >= 1 else ''} OF {symbol}. THIS LITTLE MANEUVER IS GONNA COST US $" + str(stock.price * amount))
 
 
 

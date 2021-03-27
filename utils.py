@@ -11,12 +11,15 @@ import alpaca_trade_api as ata
 
 config = configparser.ConfigParser()
 config.read('config.ini')
+
+REDDIT_ID=config["REDDIT"]["CLIENT_ID"]
+REDDIT_SECRET=config["REDDIT"]["CLIENT_SECRET"]
+
 ALP_ERR = "Alpaca encountered an error: "
 API_KEY_ID = config['ALPACA']['API_KEY_ID']
 API_SECRET_KEY = config['ALPACA']['API_SECRET_KEY']
 API_BASE_URL =  config['ALPACA']['API_BASE_URL'] if config['ALPACA']['API_BASE_URL'] else "https://paper-api.alpaca.markets" # be careful changing this!
 api = ata.REST(key_id=API_KEY_ID, secret_key=API_SECRET_KEY, base_url=API_BASE_URL)
-
 DEBUG=True
 def dprint(*args, **kwargs):
     if DEBUG:
