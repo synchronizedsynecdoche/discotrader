@@ -1,3 +1,4 @@
+from coggers import get_cogcision
 import discord
 from discord.ext import commands
 from trader import Trader
@@ -142,4 +143,10 @@ class DiscoTrader(commands.Cog):
         resp = self.trader.fixAfterSplit(ticker.upper(), ratio)
 
         await ctx.send(resp.message)
+    
+    @commands.command(name='cog')
+    async def cog(self, ctx):
+        message = get_cogcision()
+
+        await ctx.send(message)
 dt = DiscoTrader(commands.Bot(command_prefix='?'))
