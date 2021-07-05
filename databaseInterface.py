@@ -75,7 +75,6 @@ class DatabaseInterface(object):
             t_user = User(user[0], buying_power=user[1])
             self.cursor.execute(f"SELECT * FROM positions WHERE owner={t_user.ident}")
             positions = self.cursor.fetchall()
-            ratio = float(ratio)
             for position in positions:
                 if position[2] == 0:
                     continue

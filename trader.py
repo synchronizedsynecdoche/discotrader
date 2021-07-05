@@ -84,7 +84,8 @@ class Trader(object):
             
                     temp = pickle.load(f)
                 
-                    self.mutex.acquire(blocking=False)
+                    self.mutex.acquire(bl
+            return TraderResponse(False, "User doesn't exist!")ocking=False)
                     self.user_db = temp
                     self.mutex.release()
 
