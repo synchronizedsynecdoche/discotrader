@@ -77,7 +77,6 @@ class Trader(object):
         self.is_loaded = True #even if we fail, we're considered loaded with a blank db
 
         if LEGACY_INTERFACE:
-            self.is_loaded = True #even if we fail, we're considered loaded with a blank db
             try:
 
                 with open("user_db", "rb") as f:

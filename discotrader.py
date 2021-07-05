@@ -40,7 +40,7 @@ class DiscoTrader(commands.Cog):
 
     @commands.command(name='init')
     async def trader_init(self, ctx, override=False):
-        if ctx.message.author.id != ADMIN or override:
+        if ctx.message.author.id != ADMIN and not override:
             await ctx.send(AUTH_ERR)
         else:
             self.trader = Trader()
