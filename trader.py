@@ -145,7 +145,7 @@ class Trader(object):
     
         if purchaser.buying_power < price * quantity:
         
-            return TraderResponse(False, f"Insufficient buying power! Have {purchaser.buying_power} but need {price * quantity}")
+            return TraderResponse(False, f"Insufficient buying power! Have {stringify(purchaser.buying_power)} but need {price * quantity}")
     
         ctime = api.get_clock()
         if not ctime.is_open and not FORCE_EXECUTION:
