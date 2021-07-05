@@ -97,7 +97,7 @@ class Trader(object):
 
         return TraderResponse(True, "loaded successfully!")
     
-    def addUser(self, id: intocking=False) -> TraderResponse:
+    def addUser(self, id: int=False)) -> TraderResponse:
 
         if id not in [u.ident for u in self.user_db]:
 
