@@ -15,8 +15,9 @@ NewType("User", User)
 NewType("TraderResponse", TraderResponse)
 
 DEBUG: bool = True 
-FORCE_EXECUTION: bool = True
+FORCE_EXECUTION: bool = False
 LEGACY_INTERFACE: bool = False
+ALLOW_SHORT: bool = False
 
 class Trader(object):
 
@@ -183,7 +184,7 @@ class Trader(object):
             return TraderResponse(False, ALP_ERR + str(e))
     
         try:
-            if quantity > seller.findPosition(ticker).quantity:
+            if quantity > seller.findPosition(ticker).quantity and not ALLOW_SHORT:
         
                 return TraderResponse(False, f"Insufficient holdings! Have {seller.findPosition(ticker).quantity} but need {quantity}")
         except Exception as e:

@@ -31,7 +31,7 @@ class Position(object):
 
     def getAverageCost(self) -> float:
 
-        if self.quantity == 0:
+        if self.quantity <= 0 or self.sigma_cost < 0:
             return 0
         
         return self.sigma_cost / self.quantity
@@ -46,9 +46,13 @@ class Position(object):
         if self.getValue() == 0: # rip
             return 0
         
-        return 100 * (self.getValue() - self.sigma_cost) / self.getValue() 
+        return 100 * (self.getValue() - self.sigma_cost) / self.sigma_cost 
 
     def split(self, ratio) -> None:
+
+        if ratio <= 0:
+            return 
+            
         self.quantity *= ratio
     
     def package(self) -> str:
