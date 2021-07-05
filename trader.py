@@ -122,7 +122,7 @@ class Trader(object):
 
         u = self.locateUser(id)
         if u is None:
-            return TraderResponse(False, "User doesn't exist!")
+            self.addUser(id)
         
         return TraderResponse(True, f"${stringify(u.buying_power)}")
 
@@ -150,7 +150,7 @@ class Trader(object):
         ctime = api.get_clock()
         if not ctime.is_open and not FORCE_EXECUTION:
 
-            buy_thread = threading.Thread(target=self.pendingBuy, args=(buyid, ticker, quantity))
+            buy_thread = threading.Thread(target=self.pendingBuy, args=(id, ticker, quantity))
             buy_thread.start()
             return TraderResponse(True, "Markets are closed, queueing order")
 
