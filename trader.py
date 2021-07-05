@@ -97,7 +97,7 @@ class Trader(object):
 
         return TraderResponse(True, "loaded successfully!")
     
-    def addUser(self, id: int) -> TraderResponse:
+    def addUser(self, id: intocking=False)) -> TraderResponse:
 
         if id not in [u.ident for u in self.user_db]:
 
@@ -123,7 +123,8 @@ class Trader(object):
         u = self.locateUser(id)
         if u is None:
             self.addUser(id)
-        
+            u = self.locateUser(id)
+
         return TraderResponse(True, f"${stringify(u.buying_power)}")
 
 
