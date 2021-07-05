@@ -150,7 +150,7 @@ class Trader(object):
         ctime = api.get_clock()
         if not ctime.is_open and not FORCE_EXECUTION:
 
-            buy_thread = threading.Thread(target=self.pendingBuy, args=(id, ticker, quantity))
+            buy_thread = threading.Thread(target=self.pendingBuy, args=(buyid, ticker, quantity))
             buy_thread.start()
             return TraderResponse(True, "Markets are closed, queueing order")
 
@@ -244,16 +244,16 @@ class Trader(object):
         
         return TraderResponse(False, "No such user")
 
-    def fixAfterSplit(self, ticker: str, ratio: int) -> TraderResponse:
+    def fixAfterSplit(self, ticker: str, ratio: float) -> TraderResponse:
 
         if not ratio.isnumeric():
             return TraderResponse(False, "Bad ratio")
 
-        ratio = int(ratio)
         self.mutex.acquire(blocking=False)
         for u in self.user_db:
             for p in u.portfolio:
                 if p.ticker == ticker:
+                    # sanity check lives here
                     p.split(ratio)
         self.mutex.release()
 

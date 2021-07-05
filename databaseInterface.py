@@ -5,25 +5,6 @@ import utils
 from typing import List, Dict, Any, NewType
 NewType("User", User)
 NewType("Position", Position)
-'''
-p = Position("PLTR", 10, 100, 1)
-con = sqlite3.connect(":memory:")
-cursorObj = con.cursor()
-
-cursorObj.execute("CREATE TABLE positions(identity string PRIMARY KEY, ticker string, quantity int, sigma_cost float, owner int)")
-con.commit()
-try:
-    cursorObj.execute(f"INSERT INTO positions {p.package()}")
-except sqlite3.IntegrityError:
-    pass
-con.commit()
-
-cursorObj.execute('SELECT * from positions WHERE owner IS 1')
-rows = cursorObj.fetchall()
-
-for row in rows:
-    print(row)
-'''
 
 class DatabaseInterface(object):
     
@@ -94,7 +75,7 @@ class DatabaseInterface(object):
             t_user = User(user[0], buying_power=user[1])
             self.cursor.execute(f"SELECT * FROM positions WHERE owner={t_user.ident}")
             positions = self.cursor.fetchall()
-            
+                    ratio = float(ratio)
             for position in positions:
                 if position[2] == 0:
                     continue
